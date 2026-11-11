@@ -22,13 +22,14 @@ Pipeline (raw sources are downloaded into data/raw/ only if missing; that dir is
       Verbs whose main sense is copulative (seem, become) are dropped.
    b) VerbNet 3 syntactic frames (subclasses inherit parent frames):
           "NP V NP" -> tr, "NP V" -> intr, both -> ambi
+   (tr / intr / ambi are written to the CSV as transitive / intransitive / ambitransitive)
    Combination is conservative, because for grammaticality a wrong "ambi" is
    harmful (*"She brings."*) while a wrong "tr"/"intr" only loses variety:
    a use (with / without object) is allowed only if every source that knows the
    verb allows it. Only one source knows the verb -> it decides. Sources contradict
    each other (tr vs intr) or neither knows it (put needs "NP V NP PP") -> dropped.
 4. Reflexivity - yes if any non-archaic Wiktionary sense is tagged "reflexive".
-   Wiktionary tags this sparsely, so many usable reflexive verbs are marked "no".
+   Wiktionary tags this sparsely, so many usable reflexive verbs are marked false.
 5. Inflected forms - lemminflect (3sg, past, past participle, -ing).
 6. Dropped by hand: auxiliaries and modals (the sentence generator builds them itself)
    and lemmas that merge two verbs with different forms (lie: lay/lied, hang: hung/hanged).
@@ -71,6 +72,7 @@ SKIP_SENSE_TAGS = {
 }
 TRANS_TAGS = {"transitive", "intransitive", "ambitransitive", "ditransitive", "ergative"}
 USES = {"tr": {"tr"}, "intr": {"intr"}, "ambi": {"tr", "intr"}}
+LABELS = {"tr": "transitive", "intr": "intransitive", "ambi": "ambitransitive"}  # CSV values
 
 
 def fetch_sources() -> None:
@@ -189,15 +191,15 @@ def main() -> None:
             inflect(base, "VBD"),
             inflect(base, "VBN"),
             inflect(base, "VBG"),
-            trans,
-            "yes" if refl else "no",
+            LABELS[trans],
+            "true" if refl else "false",
             rank,
             source,
         ])
 
     with OUT.open("w", newline="") as f:
         w = csv.writer(f)
-        w.writerow(["base", "3sg", "past", "past_participle", "ing",
+        w.writerow(["base", "third_singular", "past", "past_participle", "ing",
                     "transitivity", "reflexive", "freq_rank", "transitivity_source"])
         w.writerows(rows)
     print(f"wrote {len(rows)} verbs to {OUT.relative_to(ROOT)}")
