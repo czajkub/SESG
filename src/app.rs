@@ -8,8 +8,10 @@ pub struct App {
     nouns: Vec<Noun>,
     verbs: Vec<Verb>,
 
-    time: Time,
-    aspect: Aspect,
+    pub time: Time,
+    pub aspect: Aspect,
+
+    pub sentence: String,
 
     // TODO: sentence type
     // affirmative by default
@@ -26,7 +28,7 @@ pub struct App {
     pub counter: u8,
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Copy, Debug, Default)]
 pub enum Time {
     #[default]
     Present,
@@ -34,7 +36,7 @@ pub enum Time {
     Future,
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Copy, Debug, Default)]
 pub enum Aspect {
     #[default]
     Simple,
@@ -51,6 +53,7 @@ impl App {
             verbs: read_verbs()?,
             time: Time::default(),
             aspect: Aspect::default(),
+            sentence: "The Example Is Sentenced".to_string(),
             counter: 0,
         })
     }
@@ -61,15 +64,22 @@ impl App {
         self.should_quit = true;
     }
 
-    pub fn increment_counter(&mut self) {
-        if let Some(res) = self.counter.checked_add(1) {
-            self.counter = res;
+    pub fn scroll_aspect(&mut self) {
+        use Aspect::*;
+        self.aspect = match self.aspect {
+            Simple => Continuous,
+            Continuous => Perfect,
+            Perfect => PerfectContinuous,
+            PerfectContinuous => Simple,
         }
     }
 
-    pub fn decrement_counter(&mut self) {
-        if let Some(res) = self.counter.checked_sub(1) {
-            self.counter = res;
+    pub fn scroll_time(&mut self) {
+        use Time::*;
+        self.time = match self.time {
+            Present => Past,
+            Past => Future,
+            Future => Present,
         }
     }
 
