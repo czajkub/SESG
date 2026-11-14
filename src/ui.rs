@@ -3,7 +3,7 @@ use ratatui::{
     style::{Color, Style, Stylize},
     text::Line,
     widgets::{Block, BorderType, Borders, Paragraph},
-    widgets::{List, ListDirection, ListState},
+    widgets::{List, ListState},
     Frame,
 };
 
@@ -21,9 +21,9 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     frame.render_widget(outer, frame.area());
 
     let [options, sentence, help] = Layout::vertical([
-        Constraint::Length(6),
+        Constraint::Length(10),
         Constraint::Fill(1),
-        Constraint::Length(1),
+        Constraint::Length(2),
     ])
     .areas(inner);
 
@@ -43,17 +43,39 @@ fn render_choice_list(frame: &mut Frame, area: Rect, title: &str, items: &[&str]
 }
 
 fn render_options(app: &App, frame: &mut Frame, area: Rect) {
-    let [left, right] = Layout::horizontal([Constraint::Fill(1), Constraint::Fill(1)])
+    let [top, bottom] = Layout::vertical([Constraint::Fill(1), Constraint::Length(4)])
         .areas(area);
 
-    render_choice_list(frame, left, "Time", &["Present", "Past", "Future"], app.time as usize);
+    let [top_left, top_right] = Layout::horizontal([Constraint::Fill(1), Constraint::Fill(1)])
+        .areas(top);
+
+    let [bottom_left, bottom_right] = Layout::horizontal([Constraint::Fill(1), Constraint::Fill(1)])
+        .areas(bottom);
+
+    render_choice_list(frame, top_left, "Time", &["Present", "Past", "Future"], app.time as usize);
     
     render_choice_list(
         frame,
-        right,
+        top_right,
         "Aspect",
         &["Simple", "Continuous", "Perfect", "Perfect Continuous"],
         app.aspect as usize,
+    );
+
+    render_choice_list(
+        frame,
+        bottom_left,
+        "Sentence type",
+        &["Affirmative", "Question"],
+        app.question as usize,
+    );
+
+    render_choice_list(
+        frame,
+        bottom_right,
+        "Negation",
+        &["Positive", "Negative"],
+        app.negative as usize,
     );
 }
 
@@ -71,8 +93,12 @@ fn render_sentences(app: &App, frame: &mut Frame, area: Rect) {
 }
 
 fn render_help(frame: &mut Frame, area: Rect) {
+    let lines = vec![
+        Line::from("t: time · a: aspect · s: sentence type · n: negative"),
+        Line::from("Enter: generate · q/Esc: quit"),
+    ];
     frame.render_widget(
-        Paragraph::new("t: time · a: aspect · Enter: generate · q/Esc: quit")
+        Paragraph::new(lines)
             .alignment(Alignment::Center)
             .dim(),
         area,

@@ -11,6 +11,8 @@ pub fn update(app: &mut App, key_event: KeyEvent) {
         }
         KeyCode::Char('a') => app.scroll_aspect(),
         KeyCode::Char('t') => app.scroll_time(),
+        KeyCode::Char('s') => app.switch_sentence_type(),
+        KeyCode::Char('n') => app.switch_negative(),
         KeyCode::Enter if key_event.kind == KeyEventKind::Press => app.generate_sentence(),
         _ => {}
     };
