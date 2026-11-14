@@ -1,4 +1,5 @@
 use color_eyre::Result;
+use rand::seq::IndexedRandom;
 use crate::words::{read_nouns, read_verbs, Noun, Verb};
 
 #[derive(Debug)]
@@ -11,7 +12,7 @@ pub struct App {
     pub time: Time,
     pub aspect: Aspect,
 
-    pub sentence: String,
+    pub sentences: Vec<String>,
 
     // TODO: sentence type
     // affirmative by default
@@ -53,7 +54,7 @@ impl App {
             verbs: read_verbs()?,
             time: Time::default(),
             aspect: Aspect::default(),
-            sentence: "The Example Is Sentenced".to_string(),
+            sentences: vec!["The Example Is Sentenced".to_string()],
             counter: 0,
         })
     }
@@ -81,6 +82,25 @@ impl App {
             Past => Future,
             Future => Present,
         }
+    }
+
+    pub fn generate_sentence(&mut self) {
+        let mut rng = rand::rng();
+
+        let subject = self.nouns.choose(&mut rng)
+                    .unwrap_or(self.nouns.get(0).unwrap())
+                    .noun.clone();
+        
+        let object = self.nouns.choose(&mut rng)
+                    .unwrap_or(self.nouns.get(0).unwrap())
+                    .noun.clone();
+        
+        let verb = self.verbs.choose(&mut rng)
+                    .unwrap_or(self.verbs.get(0).unwrap());
+        let verb_phrase = App::verb_phrase(verb, &self.time, &self.aspect);
+
+        let sentence = format!("The {} {} the {}", subject, verb_phrase, object);
+        self.sentences.push(sentence)
     }
 
     fn verb_phrase(v: &Verb, time: &Time, aspect: &Aspect) -> String {

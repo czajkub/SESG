@@ -28,7 +28,7 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     .areas(inner);
 
     render_options(app, frame, options);
-    render_sentence(app, frame, sentence);
+    render_sentences(app, frame, sentence);
     render_help(frame, help);
 }
 
@@ -57,9 +57,13 @@ fn render_options(app: &App, frame: &mut Frame, area: Rect) {
     );
 }
 
-fn render_sentence(app: &App, frame: &mut Frame, area: Rect) {
+fn render_sentences(app: &App, frame: &mut Frame, area: Rect) {
+    let lines: Vec<Line> = app.sentences
+                            .iter()
+                            .map(|s| Line::from(s.as_str()))
+                            .collect();
     frame.render_widget(
-        Paragraph::new(app.sentence.as_str())
+        Paragraph::new(lines)
             .alignment(Alignment::Center)
             .block(Block::bordered().title("Sentence")),
         area,
